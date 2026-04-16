@@ -25,12 +25,14 @@ const Clientes = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const filteredClientes = clientes.filter(cliente =>
-    cliente.nome.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredClientes = clientes.filter(cliente => {
+    const clienteNome = cliente.tipoCliente === 'PJ' ? cliente.empresa : cliente.nome;
+    return clienteNome.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const documentoLabel = formData.tipoCliente === 'PF' ? 'CPF' : 'CNPJ';
   const documentoPlaceholder = formData.tipoCliente === 'PF' ? 'Digite o CPF' : 'Digite o CNPJ';
+  const nomeLabel = formData.tipoCliente === 'PF' ? 'Nome' : 'Nome da empresa';
 
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -40,13 +42,20 @@ const Clientes = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
+
+    const cleanedFormData = {
+      ...formData,
+      nome: formData.tipoCliente === 'PF' ? formData.nome : '',
+      empresa: formData.tipoCliente === 'PJ' ? formData.empresa : '',
+    };
+
     try {
       if (editingCliente) {
-        updateCliente(editingCliente.id, formData);
+        updateCliente(editingCliente.id, cleanedFormData);
         showMessage('success', 'Cliente atualizado com sucesso!');
         setEditingCliente(null);
       } else {
-        addCliente(formData);
+        addCliente(cleanedFormData);
         showMessage('success', 'Cliente cadastrado com sucesso!');
       }
       setFormData(initialFormData);
@@ -82,6 +91,19 @@ const Clientes = () => {
     setFormData(initialFormData);
   };
 
+  const handleTipoClienteChange = (tipoCliente: 'PF' | 'PJ') => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      tipoCliente,
+      nome: tipoCliente === 'PJ' ? '' : prevFormData.nome,
+      empresa: tipoCliente === 'PF' ? '' : prevFormData.empresa,
+    }));
+  };
+
+  const getNomeExibicao = (cliente: Cliente) => {
+    return cliente.tipoCliente === 'PJ' ? cliente.empresa : cliente.nome;
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -100,32 +122,37 @@ const Clientes = () => {
           {editingCliente ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}
         </h3>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <Input
-            label="Nome"
-            type="text"
-            value={formData.nome}
-            onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-            required
-          />
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">Tipo de cliente</label>
             <select
               className="w-full rounded-lg border border-slate-300 px-3 py-2.5 focus:border-blue-500 focus:ring-blue-500"
               value={formData.tipoCliente}
-              onChange={(e) => setFormData({ ...formData, tipoCliente: e.target.value as 'PF' | 'PJ' })}
+              onChange={(e) => handleTipoClienteChange(e.target.value as 'PF' | 'PJ')}
               required
             >
               <option value="PJ">Pessoa Jurídica (PJ)</option>
               <option value="PF">Pessoa Física (PF)</option>
             </select>
           </div>
-          <Input
-            label="Empresa"
-            type="text"
-            value={formData.empresa}
-            onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
-            required
-          />
+
+          {formData.tipoCliente === 'PF' ? (
+            <Input
+              label={nomeLabel}
+              type="text"
+              value={formData.nome}
+              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+              required
+            />
+          ) : (
+            <Input
+              label={nomeLabel}
+              type="text"
+              value={formData.empresa}
+              onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
+              required
+            />
+          )}
+
           <Input
             label={documentoLabel}
             type="text"
@@ -181,12 +208,11 @@ const Clientes = () => {
         </div>
       </div>
 
-      <Table headers={['Nome', 'Tipo', 'Empresa', 'CPF/CNPJ', 'Telefone', 'Email', 'Cidade', 'Ações']}>
+      <Table headers={['Nome', 'Tipo', 'CPF/CNPJ', 'Telefone', 'Email', 'Cidade', 'Ações']}>
         {filteredClientes.map((cliente) => (
           <tr key={cliente.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
-            <td className="px-6 py-4 text-sm text-slate-900">{cliente.nome}</td>
+            <td className="px-6 py-4 text-sm text-slate-900">{getNomeExibicao(cliente)}</td>
             <td className="px-6 py-4 text-sm text-slate-900">{cliente.tipoCliente}</td>
-            <td className="px-6 py-4 text-sm text-slate-900">{cliente.empresa}</td>
             <td className="px-6 py-4 text-sm text-slate-900">{cliente.documento}</td>
             <td className="px-6 py-4 text-sm text-slate-900">{cliente.telefone}</td>
             <td className="px-6 py-4 text-sm text-slate-900">{cliente.email}</td>
@@ -203,7 +229,7 @@ const Clientes = () => {
         ))}
         {filteredClientes.length === 0 && (
           <tr>
-            <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
+            <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
               Nenhum cliente encontrado.
             </td>
           </tr>
