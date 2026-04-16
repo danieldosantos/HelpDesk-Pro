@@ -1,31 +1,44 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import type { Produto } from '../types/Produto.ts';
-import { useProdutos } from '../hooks/useProdutos.ts';
-import Card from '../../components/ui/Card';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
-import Table from '../../components/ui/Table';
+import type { Produto } from '../../types/Produto';
+import { useProdutos } from '../../hooks/useProdutos';
+import Card from '../../../components/ui/Card';
+import Input from '../../../components/ui/Input';
+import Button from '../../../components/ui/Button';
+import Table from '../../../components/ui/Table';
+
+type ProdutoFormData = {
+  nome: string;
+  sku: string;
+  categoria: string;
+  quantidadeAtual: number;
+  estoqueMinimo: number;
+  valorUnitario: number;
+  status: Produto['status'];
+};
+
+const initialFormData: ProdutoFormData = {
+  nome: '',
+  sku: '',
+  categoria: '',
+  quantidadeAtual: 0,
+  estoqueMinimo: 0,
+  valorUnitario: 0,
+  status: 'ativo',
+};
 
 const Produtos = () => {
   const { produtos, addProduto, updateProduto, deleteProduto, isSkuDisponivel } = useProdutos();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingProduto, setEditingProduto] = useState<Produto | null>(null);
-  const [formData, setFormData] = useState({
-    nome: '',
-    sku: '',
-    categoria: '',
-    quantidadeAtual: 0,
-    estoqueMinimo: 0,
-    valorUnitario: 0,
-    status: 'ativo' as const,
-  });
+  const [formData, setFormData] = useState<ProdutoFormData>(initialFormData);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const filteredProdutos = produtos.filter(produto =>
-    produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    produto.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProdutos = produtos.filter(
+    (produto) =>
+      produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      produto.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const showMessage = (type: 'success' | 'error', text: string) => {
@@ -70,16 +83,8 @@ const Produtos = () => {
         addProduto(formData);
         showMessage('success', 'Produto cadastrado com sucesso!');
       }
-      setFormData({
-        nome: '',
-        sku: '',
-        categoria: '',
-        quantidadeAtual: 0,
-        estoqueMinimo: 0,
-        valorUnitario: 0,
-        status: 'ativo',
-      });
-    } catch (error) {
+      setFormData(initialFormData);
+    } catch {
       showMessage('error', 'Erro ao salvar produto.');
     } finally {
       setLoading(false);
@@ -108,28 +113,7 @@ const Produtos = () => {
 
   const handleCancel = () => {
     setEditingProduto(null);
-    setFormData({
-      nome: '',
-      sku: '',
-      categoria: '',
-      quantidadeAtual: 0,
-      estoqueMinimo: 0,
-      valorUnitario: 0,
-      status: 'ativo',
-    });
-  };
-
-  const getStatusBadge = (status: string) => {
-    return status === 'ativo'
-      ? <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Ativo</span>
-      : <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inativo</span>;
-  };
-
-  const getEstoqueStatus = (produto: Produto) => {
-    if (produto.quantidadeAtual <= produto.estoqueMinimo) {
-      return <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Estoque Baixo</span>;
-    }
-    return <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Estoque OK</span>;
+    setFormData(initialFormData);
   };
 
   return (
@@ -140,160 +124,123 @@ const Produtos = () => {
       </div>
 
       {message && (
-        <div className={`mb-4 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <div
+          className={`mb-4 p-4 rounded-lg ${
+            message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}
+        >
           {message.text}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <Card>
-            <Card.Header>
-              <h3 className="text-lg font-semibold text-slate-800">
-                {editingProduto ? 'Editar Produto' : 'Novo Produto'}
-              </h3>
-            </Card.Header>
-            <Card.Content>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <Input
-                  label="Nome"
-                  value={formData.nome}
-                  onChange={(value) => setFormData({ ...formData, nome: value })}
-                  required
-                />
-                <Input
-                  label="SKU"
-                  value={formData.sku}
-                  onChange={(value) => setFormData({ ...formData, sku: value.toUpperCase() })}
-                  required
-                  placeholder="Código único do produto"
-                />
-                <Input
-                  label="Categoria"
-                  value={formData.categoria}
-                  onChange={(value) => setFormData({ ...formData, categoria: value })}
-                  required
-                />
-                <Input
-                  label="Quantidade Atual"
-                  type="number"
-                  value={formData.quantidadeAtual}
-                  onChange={(value) => setFormData({ ...formData, quantidadeAtual: parseInt(value) || 0 })}
-                  min="0"
-                  required
-                />
-                <Input
-                  label="Estoque Mínimo"
-                  type="number"
-                  value={formData.estoqueMinimo}
-                  onChange={(value) => setFormData({ ...formData, estoqueMinimo: parseInt(value) || 0 })}
-                  min="0"
-                  required
-                />
-                <Input
-                  label="Valor Unitário (R$)"
-                  type="number"
-                  step="0.01"
-                  value={formData.valorUnitario}
-                  onChange={(value) => setFormData({ ...formData, valorUnitario: parseFloat(value) || 0 })}
-                  min="0"
-                  required
-                />
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'ativo' | 'inativo' })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="ativo">Ativo</option>
-                    <option value="inativo">Inativo</option>
-                  </select>
-                </div>
-                <div className="flex gap-2">
-                  <Button type="submit" disabled={loading} className="flex-1">
-                    {loading ? 'Salvando...' : editingProduto ? 'Atualizar' : 'Cadastrar'}
-                  </Button>
-                  {editingProduto && (
-                    <Button type="button" variant="secondary" onClick={handleCancel}>
-                      Cancelar
-                    </Button>
-                  )}
-                </div>
-              </form>
-            </Card.Content>
-          </Card>
-        </div>
+      <Card className="shadow-lg">
+        <h3 className="text-xl font-semibold mb-6">{editingProduto ? 'Editar Produto' : 'Novo Produto'}</h3>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Nome"
+            value={formData.nome}
+            onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+            required
+          />
+          <Input
+            label="SKU"
+            value={formData.sku}
+            onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
+            required
+          />
+          <Input
+            label="Categoria"
+            value={formData.categoria}
+            onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+            required
+          />
+          <Input
+            label="Quantidade Atual"
+            type="number"
+            min="0"
+            value={formData.quantidadeAtual}
+            onChange={(e) => setFormData({ ...formData, quantidadeAtual: Number(e.target.value) || 0 })}
+            required
+          />
+          <Input
+            label="Estoque Mínimo"
+            type="number"
+            min="0"
+            value={formData.estoqueMinimo}
+            onChange={(e) => setFormData({ ...formData, estoqueMinimo: Number(e.target.value) || 0 })}
+            required
+          />
+          <Input
+            label="Valor Unitário (R$)"
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.valorUnitario}
+            onChange={(e) => setFormData({ ...formData, valorUnitario: Number(e.target.value) || 0 })}
+            required
+          />
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+            <select
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as Produto['status'] })}
+            >
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+          <div className="md:col-span-2 flex gap-2">
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Salvando...' : editingProduto ? 'Atualizar' : 'Cadastrar'}
+            </Button>
+            {editingProduto && (
+              <Button type="button" variant="secondary" onClick={handleCancel}>
+                Cancelar
+              </Button>
+            )}
+          </div>
+        </form>
+      </Card>
 
-        <div className="lg:col-span-2">
-          <Card>
-            <Card.Header>
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-slate-800">Lista de Produtos</h3>
-                <Input
-                  placeholder="Buscar produtos..."
-                  value={searchTerm}
-                  onChange={setSearchTerm}
-                  className="w-64"
-                />
-              </div>
-            </Card.Header>
-            <Card.Content>
-              <Table>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.Head>Nome</Table.Head>
-                    <Table.Head>SKU</Table.Head>
-                    <Table.Head>Categoria</Table.Head>
-                    <Table.Head>Estoque</Table.Head>
-                    <Table.Head>Status</Table.Head>
-                    <Table.Head>Ações</Table.Head>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {filteredProdutos.map((produto) => (
-                    <Table.Row key={produto.id}>
-                      <Table.Cell className="font-medium">{produto.nome}</Table.Cell>
-                      <Table.Cell>{produto.sku}</Table.Cell>
-                      <Table.Cell>{produto.categoria}</Table.Cell>
-                      <Table.Cell>
-                        <div className="flex flex-col gap-1">
-                          <span>{produto.quantidadeAtual} unidades</span>
-                          {getEstoqueStatus(produto)}
-                        </div>
-                      </Table.Cell>
-                      <Table.Cell>{getStatusBadge(produto.status)}</Table.Cell>
-                      <Table.Cell>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => handleEdit(produto)}
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="danger"
-                            onClick={() => handleDelete(produto.id)}
-                          >
-                            Excluir
-                          </Button>
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
-              {filteredProdutos.length === 0 && (
-                <div className="text-center py-8 text-slate-500">
-                  Nenhum produto encontrado
-                </div>
-              )}
-            </Card.Content>
-          </Card>
-        </div>
+      <div className="max-w-md">
+        <Input
+          placeholder="Buscar por nome ou SKU"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
+
+      <Table
+        headers={['Nome', 'SKU', 'Categoria', 'Qtd', 'Estoque Mín.', 'Status', 'Ações']}
+        className="shadow-lg"
+      >
+        {filteredProdutos.map((produto) => (
+          <tr key={produto.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+            <td className="px-6 py-4 text-sm">{produto.nome}</td>
+            <td className="px-6 py-4 text-sm">{produto.sku}</td>
+            <td className="px-6 py-4 text-sm">{produto.categoria}</td>
+            <td className="px-6 py-4 text-sm">{produto.quantidadeAtual}</td>
+            <td className="px-6 py-4 text-sm">{produto.estoqueMinimo}</td>
+            <td className="px-6 py-4 text-sm">{produto.status}</td>
+            <td className="px-6 py-4 text-sm space-x-2">
+              <Button variant="secondary" className="text-xs" onClick={() => handleEdit(produto)}>
+                Editar
+              </Button>
+              <Button variant="danger" className="text-xs" onClick={() => handleDelete(produto.id)}>
+                Excluir
+              </Button>
+            </td>
+          </tr>
+        ))}
+        {filteredProdutos.length === 0 && (
+          <tr>
+            <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+              Nenhum produto encontrado.
+            </td>
+          </tr>
+        )}
+      </Table>
     </div>
   );
 };

@@ -14,7 +14,6 @@ const Dashboard = () => {
   const chamadosAbertos = chamados.filter(c => c.status === 'aberto').length;
   const chamadosConcluidos = chamados.filter(c => c.status === 'concluído').length;
 
-  const totalProdutos = produtos.length;
   const produtosAtivos = produtos.filter(p => p.status === 'ativo').length;
   const produtosEstoqueBaixo = getProdutosEstoqueBaixo().length;
   const movimentacoesDoDia = getMovimentacoesDoDia().length;
