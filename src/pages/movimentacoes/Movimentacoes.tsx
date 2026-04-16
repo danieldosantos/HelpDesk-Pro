@@ -1,28 +1,37 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import type { Movimentacao } from '../../types/Produto.ts';
-import { useMovimentacoes } from '../../hooks/useMovimentacoes.ts';
-import { useProdutos } from '../../hooks/useProdutos.ts';
-import { EstoqueService } from '../../services/EstoqueService.ts';
-import Card from '../../components/ui/Card';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
-import Table from '../../components/ui/Table';
+import type { Movimentacao } from '../../types/Produto';
+import { useMovimentacoes } from '../../hooks/useMovimentacoes';
+import { useProdutos } from '../../hooks/useProdutos';
+import { EstoqueService } from '../../services/EstoqueService';
+import Card from '../../../components/ui/Card';
+import Input from '../../../components/ui/Input';
+import Button from '../../../components/ui/Button';
+import Table from '../../../components/ui/Table';
+
+type MovimentacaoFormData = {
+  produtoId: string;
+  tipo: Movimentacao['tipo'];
+  quantidade: number;
+  motivo: string;
+};
+
+const initialFormData: MovimentacaoFormData = {
+  produtoId: '',
+  tipo: 'entrada',
+  quantidade: 0,
+  motivo: '',
+};
 
 const Movimentacoes = () => {
   const { movimentacoes, addMovimentacao, getMovimentacoesDoDia } = useMovimentacoes();
   const { produtos, updateEstoque } = useProdutos();
-  const [formData, setFormData] = useState({
-    produtoId: '',
-    tipo: 'entrada' as Movimentacao['tipo'],
-    quantidade: 0,
-    motivo: '',
-  });
+  const [formData, setFormData] = useState<MovimentacaoFormData>(initialFormData);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const movimentacoesDoDia = getMovimentacoesDoDia();
-  const produtosAtivos = produtos.filter(p => p.status === 'ativo');
+  const produtosAtivos = produtos.filter((produto) => produto.status === 'ativo');
 
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -34,7 +43,7 @@ const Movimentacoes = () => {
     if (formData.quantidade <= 0) return 'Quantidade deve ser maior que zero';
     if (!formData.motivo.trim()) return 'Motivo é obrigatório';
 
-    const produto = produtos.find(p => p.id === formData.produtoId);
+    const produto = produtos.find((p) => p.id === formData.produtoId);
     if (!produto) return 'Produto não encontrado';
 
     return EstoqueService.validarMovimentacao(produto, formData.tipo, formData.quantidade);
@@ -50,7 +59,12 @@ const Movimentacoes = () => {
 
     setLoading(true);
     try {
-      const produto = produtos.find(p => p.id === formData.produtoId)!;
+      const produto = produtos.find((p) => p.id === formData.produtoId);
+      if (!produto) {
+        showMessage('error', 'Produto não encontrado.');
+        return;
+      }
+
       const resultado = EstoqueService.registrarMovimentacao(
         produto,
         formData.tipo,
@@ -62,43 +76,18 @@ const Movimentacoes = () => {
 
       if (resultado.sucesso) {
         showMessage('success', resultado.mensagem);
-        setFormData({
-          produtoId: '',
-          tipo: 'entrada',
-          quantidade: 0,
-          motivo: '',
-        });
+        setFormData(initialFormData);
       } else {
         showMessage('error', resultado.mensagem);
       }
-    } catch (error) {
+    } catch {
       showMessage('error', 'Erro ao registrar movimentação.');
     } finally {
       setLoading(false);
     }
   };
 
-  const getTipoBadge = (tipo: Movimentacao['tipo']) => {
-    const styles = {
-      entrada: 'bg-green-100 text-green-800',
-      saida: 'bg-red-100 text-red-800',
-      ajuste: 'bg-blue-100 text-blue-800',
-    };
-    const labels = {
-      entrada: 'Entrada',
-      saida: 'Saída',
-      ajuste: 'Ajuste',
-    };
-    return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${styles[tipo]}`}>
-        {labels[tipo]}
-      </span>
-    );
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR');
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleString('pt-BR');
 
   return (
     <div className="space-y-8">
@@ -108,169 +97,99 @@ const Movimentacoes = () => {
       </div>
 
       {message && (
-        <div className={`mb-4 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <div
+          className={`mb-4 p-4 rounded-lg ${
+            message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}
+        >
           {message.text}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <Card>
-            <Card.Header>
-              <h3 className="text-lg font-semibold text-slate-800">Nova Movimentação</h3>
-            </Card.Header>
-            <Card.Content>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Produto</label>
-                  <select
-                    value={formData.produtoId}
-                    onChange={(e) => setFormData({ ...formData, produtoId: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="">Selecione um produto</option>
-                    {produtosAtivos.map(produto => (
-                      <option key={produto.id} value={produto.id}>
-                        {produto.nome} (SKU: {produto.sku}) - Estoque: {produto.quantidadeAtual}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+      <Card className="shadow-lg">
+        <h3 className="text-xl font-semibold mb-6">Nova Movimentação</h3>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Produto</label>
+            <select
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              value={formData.produtoId}
+              onChange={(e) => setFormData({ ...formData, produtoId: e.target.value })}
+              required
+            >
+              <option value="">Selecione um produto</option>
+              {produtosAtivos.map((produto) => (
+                <option key={produto.id} value={produto.id}>
+                  {produto.nome} (SKU: {produto.sku}) - Estoque: {produto.quantidadeAtual}
+                </option>
+              ))}
+            </select>
+          </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Movimentação</label>
-                  <select
-                    value={formData.tipo}
-                    onChange={(e) => setFormData({ ...formData, tipo: e.target.value as Movimentacao['tipo'] })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="entrada">Entrada</option>
-                    <option value="saida">Saída</option>
-                    <option value="ajuste">Ajuste</option>
-                  </select>
-                </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Movimentação</label>
+            <select
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              value={formData.tipo}
+              onChange={(e) => setFormData({ ...formData, tipo: e.target.value as Movimentacao['tipo'] })}
+            >
+              <option value="entrada">Entrada</option>
+              <option value="saida">Saída</option>
+              <option value="ajuste">Ajuste</option>
+            </select>
+          </div>
 
-                <Input
-                  label="Quantidade"
-                  type="number"
-                  value={formData.quantidade}
-                  onChange={(value) => setFormData({ ...formData, quantidade: parseInt(value) || 0 })}
-                  min="1"
-                  required
-                />
+          <Input
+            label="Quantidade"
+            type="number"
+            min="1"
+            value={formData.quantidade}
+            onChange={(e) => setFormData({ ...formData, quantidade: Number(e.target.value) || 0 })}
+            required
+          />
 
-                <Input
-                  label="Motivo"
-                  value={formData.motivo}
-                  onChange={(value) => setFormData({ ...formData, motivo: value })}
-                  required
-                  placeholder="Descreva o motivo da movimentação"
-                />
+          <Input
+            label="Motivo"
+            value={formData.motivo}
+            onChange={(e) => setFormData({ ...formData, motivo: e.target.value })}
+            required
+          />
 
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading ? 'Registrando...' : 'Registrar Movimentação'}
-                </Button>
-              </form>
-            </Card.Content>
-          </Card>
-        </div>
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Registrando...' : 'Registrar Movimentação'}
+            </Button>
+          </div>
+        </form>
+      </Card>
 
-        <div className="lg:col-span-2">
-          <Card>
-            <Card.Header>
-              <h3 className="text-lg font-semibold text-slate-800">
-                Movimentações de Hoje ({movimentacoesDoDia.length})
-              </h3>
-            </Card.Header>
-            <Card.Content>
-              <Table>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.Head>Data/Hora</Table.Head>
-                    <Table.Head>Produto</Table.Head>
-                    <Table.Head>Tipo</Table.Head>
-                    <Table.Head>Quantidade</Table.Head>
-                    <Table.Head>Motivo</Table.Head>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {movimentacoesDoDia
-                    .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
-                    .map((mov) => {
-                      const produto = produtos.find(p => p.id === mov.produtoId);
-                      return (
-                        <Table.Row key={mov.id}>
-                          <Table.Cell>{formatDate(mov.data)}</Table.Cell>
-                          <Table.Cell className="font-medium">
-                            {produto ? produto.nome : 'Produto não encontrado'}
-                          </Table.Cell>
-                          <Table.Cell>{getTipoBadge(mov.tipo)}</Table.Cell>
-                          <Table.Cell>{mov.quantidade}</Table.Cell>
-                          <Table.Cell className="max-w-xs truncate" title={mov.motivo}>
-                            {mov.motivo}
-                          </Table.Cell>
-                        </Table.Row>
-                      );
-                    })}
-                </Table.Body>
-              </Table>
-              {movimentacoesDoDia.length === 0 && (
-                <div className="text-center py-8 text-slate-500">
-                  Nenhuma movimentação registrada hoje
-                </div>
-              )}
-            </Card.Content>
-          </Card>
+      <Table headers={['Data/Hora', 'Produto', 'Tipo', 'Quantidade', 'Motivo']} className="shadow-lg">
+        {movimentacoesDoDia
+          .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+          .map((movimentacao) => {
+            const produto = produtos.find((p) => p.id === movimentacao.produtoId);
+            return (
+              <tr key={movimentacao.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                <td className="px-6 py-4 text-sm">{formatDate(movimentacao.data)}</td>
+                <td className="px-6 py-4 text-sm">{produto ? produto.nome : 'Produto não encontrado'}</td>
+                <td className="px-6 py-4 text-sm">{movimentacao.tipo}</td>
+                <td className="px-6 py-4 text-sm">{movimentacao.quantidade}</td>
+                <td className="px-6 py-4 text-sm">{movimentacao.motivo}</td>
+              </tr>
+            );
+          })}
+        {movimentacoesDoDia.length === 0 && (
+          <tr>
+            <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+              Nenhuma movimentação registrada hoje.
+            </td>
+          </tr>
+        )}
+      </Table>
 
-          <Card className="mt-6">
-            <Card.Header>
-              <h3 className="text-lg font-semibold text-slate-800">
-                Histórico Completo ({movimentacoes.length})
-              </h3>
-            </Card.Header>
-            <Card.Content>
-              <Table>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.Head>Data/Hora</Table.Head>
-                    <Table.Head>Produto</Table.Head>
-                    <Table.Head>Tipo</Table.Head>
-                    <Table.Head>Quantidade</Table.Head>
-                    <Table.Head>Motivo</Table.Head>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {movimentacoes
-                    .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
-                    .slice(0, 50) // Mostra apenas as últimas 50 movimentações
-                    .map((mov) => {
-                      const produto = produtos.find(p => p.id === mov.produtoId);
-                      return (
-                        <Table.Row key={mov.id}>
-                          <Table.Cell>{formatDate(mov.data)}</Table.Cell>
-                          <Table.Cell className="font-medium">
-                            {produto ? produto.nome : 'Produto não encontrado'}
-                          </Table.Cell>
-                          <Table.Cell>{getTipoBadge(mov.tipo)}</Table.Cell>
-                          <Table.Cell>{mov.quantidade}</Table.Cell>
-                          <Table.Cell className="max-w-xs truncate" title={mov.motivo}>
-                            {mov.motivo}
-                          </Table.Cell>
-                        </Table.Row>
-                      );
-                    })}
-                </Table.Body>
-              </Table>
-              {movimentacoes.length === 0 && (
-                <div className="text-center py-8 text-slate-500">
-                  Nenhuma movimentação registrada
-                </div>
-              )}
-            </Card.Content>
-          </Card>
-        </div>
-      </div>
+      {movimentacoes.length > 0 && (
+        <div className="text-sm text-slate-500">Total histórico de movimentações: {movimentacoes.length}</div>
+      )}
     </div>
   );
 };
