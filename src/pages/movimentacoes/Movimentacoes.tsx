@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import type { Movimentacao } from '../types/Produto.ts';
-import { useMovimentacoes } from '../hooks/useMovimentacoes.ts';
-import { useProdutos } from '../hooks/useProdutos.ts';
-import { EstoqueService } from '../services/EstoqueService.ts';
+import type { Movimentacao } from '../../types/Produto.ts';
+import { useMovimentacoes } from '../../hooks/useMovimentacoes.ts';
+import { useProdutos } from '../../hooks/useProdutos.ts';
+import { EstoqueService } from '../../services/EstoqueService.ts';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';

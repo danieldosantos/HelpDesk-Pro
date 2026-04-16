@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import type { Produto } from '../types/Produto.ts';
-import { useProdutos } from '../hooks/useProdutos.ts';
+import type { Produto } from '../../types/Produto.ts';
+import { useProdutos } from '../../hooks/useProdutos.ts';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
