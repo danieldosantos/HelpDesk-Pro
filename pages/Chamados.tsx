@@ -28,7 +28,8 @@ const Chamados = () => {
 
   const getClienteNome = (clienteId: string) => {
     const cliente = clientes.find(c => c.id === clienteId);
-    return cliente ? cliente.nome : 'Cliente não encontrado';
+    if (!cliente) return 'Cliente não encontrado';
+    return cliente.tipoCliente === 'PJ' ? cliente.empresa : cliente.nome;
   };
 
   const showMessage = (type: 'success' | 'error', text: string) => {
@@ -115,7 +116,7 @@ const Chamados = () => {
               <option value="">Selecione um cliente</option>
               {clientes.map(cliente => (
                 <option key={cliente.id} value={cliente.id}>
-                  {cliente.nome} - {cliente.empresa}
+                  {cliente.tipoCliente === 'PJ' ? cliente.empresa : cliente.nome}
                 </option>
               ))}
             </select>
