@@ -69,9 +69,9 @@ const Chamados = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-slate-800 mb-2">Chamados</h2>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-2xl font-bold text-slate-800">Chamados</h2>
         <p className="text-slate-600">Gerencie os chamados técnicos</p>
       </div>
 
@@ -82,9 +82,9 @@ const Chamados = () => {
       )}
 
       {/* Formulário */}
-      <Card className="shadow-lg">
-        <h3 className="text-xl font-semibold mb-6">Abrir Novo Chamado</h3>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Card>
+        <h3 className="mb-5 text-xl font-semibold">Abrir Novo Chamado</h3>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div className="md:col-span-2">
             <Input
               label="Título"
@@ -99,7 +99,7 @@ const Chamados = () => {
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 focus:border-blue-500 focus:ring-blue-500"
               rows={3}
               required
             />
@@ -109,7 +109,7 @@ const Chamados = () => {
             <select
               value={formData.clienteId}
               onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 focus:border-blue-500 focus:ring-blue-500"
               required
             >
               <option value="">Selecione um cliente</option>
@@ -125,14 +125,14 @@ const Chamados = () => {
             <select
               value={formData.prioridade}
               onChange={(e) => setFormData({ ...formData, prioridade: e.target.value as 'baixa' | 'media' | 'alta' })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 focus:border-blue-500 focus:ring-blue-500"
             >
               <option value="baixa">Baixa</option>
               <option value="media">Média</option>
               <option value="alta">Alta</option>
             </select>
           </div>
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 flex justify-center pt-1">
             <Button type="submit" disabled={loading}>
               {loading ? 'Abrindo...' : 'Abrir Chamado'}
             </Button>

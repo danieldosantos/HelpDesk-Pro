@@ -86,9 +86,9 @@ const Clientes = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-slate-800 mb-2">Clientes</h2>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-2xl font-bold text-slate-800">Clientes</h2>
         <p className="text-slate-600">Gerencie os clientes do sistema</p>
       </div>
 
@@ -99,11 +99,11 @@ const Clientes = () => {
       )}
 
       {/* Formulário */}
-      <Card className="shadow-lg">
-        <h3 className="text-xl font-semibold mb-6">
+      <Card>
+        <h3 className="mb-5 text-xl font-semibold">
           {editingCliente ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}
         </h3>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Input
             label="Nome"
             type="text"
@@ -141,7 +141,7 @@ const Clientes = () => {
               required
             />
           </div>
-          <div className="md:col-span-2 flex gap-2">
+          <div className="md:col-span-2 flex flex-wrap gap-2 pt-1">
             <Button type="submit" disabled={loading}>
               {loading ? 'Salvando...' : editingCliente ? 'Atualizar' : 'Salvar'}
             </Button>
@@ -155,7 +155,7 @@ const Clientes = () => {
       </Card>
 
       {/* Busca */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center">
         <div className="flex-1 max-w-md">
           <Input
             type="text"
@@ -167,7 +167,7 @@ const Clientes = () => {
       </div>
 
       {/* Tabela */}
-      <Table headers={['Nome', 'Empresa', 'Telefone', 'Cidade', 'Ações']} className="shadow-lg">
+      <Table headers={['Nome', 'Empresa', 'Telefone', 'Cidade', 'Ações']}>
         {filteredClientes.map((cliente) => (
           <tr key={cliente.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
             <td className="px-6 py-4 text-sm text-slate-900">{cliente.nome}</td>

@@ -6,7 +6,7 @@ interface TableProps {
 
 const Table = ({ headers, children, className = '' }: TableProps) => {
   return (
-    <div className={`bg-white rounded-xl shadow-md overflow-hidden ${className}`}>
+    <div className={`overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 ${className}`}>
       <table className="w-full">
         <thead className="bg-slate-50">
           <tr>

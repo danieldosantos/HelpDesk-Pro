@@ -12,11 +12,11 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-slate-800 text-white min-h-screen">
-      <div className="px-6 py-8 border-b border-slate-700">
+    <div className="min-h-screen w-60 bg-slate-800 text-white">
+      <div className="border-b border-slate-700 px-6 py-7">
         <h2 className="text-xl font-bold">HelpDesk Pro</h2>
       </div>
-      <nav className="mt-8">
+      <nav className="mt-6">
         <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.path}>
