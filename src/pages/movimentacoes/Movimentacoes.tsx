@@ -90,9 +90,9 @@ const Movimentacoes = () => {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleString('pt-BR');
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-slate-800 mb-2">Movimentações de Estoque</h2>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-2xl font-bold text-slate-800">Movimentações de Estoque</h2>
         <p className="text-slate-600">Registre entradas, saídas e ajustes de estoque</p>
       </div>
 
@@ -106,13 +106,13 @@ const Movimentacoes = () => {
         </div>
       )}
 
-      <Card className="shadow-lg">
-        <h3 className="text-xl font-semibold mb-6">Nova Movimentação</h3>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Card>
+        <h3 className="mb-5 text-xl font-semibold">Nova Movimentação</h3>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Produto</label>
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5"
               value={formData.produtoId}
               onChange={(e) => setFormData({ ...formData, produtoId: e.target.value })}
               required
@@ -129,7 +129,7 @@ const Movimentacoes = () => {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Movimentação</label>
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5"
               value={formData.tipo}
               onChange={(e) => setFormData({ ...formData, tipo: e.target.value as Movimentacao['tipo'] })}
             >
@@ -155,7 +155,7 @@ const Movimentacoes = () => {
             required
           />
 
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 flex justify-center pt-1">
             <Button type="submit" disabled={loading}>
               {loading ? 'Registrando...' : 'Registrar Movimentação'}
             </Button>
@@ -163,7 +163,7 @@ const Movimentacoes = () => {
         </form>
       </Card>
 
-      <Table headers={['Data/Hora', 'Produto', 'Tipo', 'Quantidade', 'Motivo']} className="shadow-lg">
+      <Table headers={['Data/Hora', 'Produto', 'Tipo', 'Quantidade', 'Motivo']}>
         {movimentacoesDoDia
           .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
           .map((movimentacao) => {
