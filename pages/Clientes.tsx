@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import type { Cliente } from '../types/Cliente';
-import { useClientes } from '../hooks/useClientes';
+import { useClientes } from '../src/hooks/useClientes';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';

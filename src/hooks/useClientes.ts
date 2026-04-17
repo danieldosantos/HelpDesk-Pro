@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Cliente } from '../types/Cliente.ts';
+import type { Cliente } from '../../types/Cliente.ts';
 
 const STORAGE_KEY = 'helpdesk-clientes';
 

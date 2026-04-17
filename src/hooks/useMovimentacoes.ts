@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Movimentacao } from '../types/Produto.ts';
+import type { Movimentacao } from '../../types/Produto.ts';
 
 const STORAGE_KEY = 'helpdesk-movimentacoes';
 

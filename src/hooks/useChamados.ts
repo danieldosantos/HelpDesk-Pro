@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import type { Chamado, ProdutoConsumido } from '../types/Chamado.ts';
-import { EstoqueService } from '../src/services/EstoqueService.ts';
+import type { Chamado, ProdutoConsumido } from '../../types/Chamado.ts';
+import { EstoqueService } from '../services/EstoqueService.ts';
 
 const STORAGE_KEY = 'helpdesk-chamados';
 

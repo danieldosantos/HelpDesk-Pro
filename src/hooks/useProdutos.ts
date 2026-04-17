@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Produto } from '../types/Produto.ts';
+import type { Produto } from '../../types/Produto.ts';
 
 const STORAGE_KEY = 'helpdesk-produtos';
 

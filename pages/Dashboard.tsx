@@ -1,5 +1,5 @@
-import { useClientes } from '../hooks/useClientes';
-import { useChamados } from '../hooks/useChamados';
+import { useClientes } from '../src/hooks/useClientes';
+import { useChamados } from '../src/hooks/useChamados';
 import { useProdutos } from '../src/hooks/useProdutos.ts';
 import { useMovimentacoes } from '../src/hooks/useMovimentacoes.ts';
 
